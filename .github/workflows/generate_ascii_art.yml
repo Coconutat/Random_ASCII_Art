@@ -56,8 +56,7 @@ jobs:
           image_url = fetch_random_image(api_key)
           ascii_art = image_to_ascii(image_url)
 
-          # 使用当前时间戳命名文件
-          now = datetime.now()
+          # 使用 UUID 命名文件
           filename = f"arts/{uuid.uuid4()}.txt"
           
           with open(filename, "w") as f:
