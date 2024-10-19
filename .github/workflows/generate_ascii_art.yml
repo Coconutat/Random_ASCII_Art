@@ -10,8 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
 
       - name: Create arts directory
         run: mkdir -p arts
@@ -70,5 +71,4 @@ jobs:
             commit_message: 'Add generated ASCII Art'
             file_pattern: 'arts/*.txt'
             branch: 'main'
-            github_token: ${{ secrets.USER_TOKEN }}
   
