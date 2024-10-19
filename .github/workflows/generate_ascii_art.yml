@@ -32,6 +32,7 @@ jobs:
           import numpy as np
           import io
           import random
+          import uuid
           from datetime import datetime
 
           def fetch_random_image(api_key):
