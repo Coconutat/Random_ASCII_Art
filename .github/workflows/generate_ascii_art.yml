@@ -53,15 +53,15 @@ jobs:
 
               ascii_image = ""
               for row in pixels:
-                  ascii_image += "".join([ascii_chars[pixel // 32] for pixel in row]) + "\n\n"  # 添加行间距
+                  ascii_image += "".join([ascii_chars[pixel // 32] for pixel in row]) + "\n"  # 保留换行
               return ascii_image
 
           api_key = "${{ secrets.PEXELS_API_KEY }}"
           image_url = fetch_random_image(api_key)
           ascii_art = image_to_ascii(image_url)
 
-          # 使用 UUID 命名文件
-          filename = f"arts/{uuid.uuid4()}.txt"
+          # 使用 UUID 命名文件并保存为 .md 文件
+          filename = f"arts/{uuid.uuid4()}.md"
           
           with open(filename, "w") as f:
               f.write(ascii_art)' > generate_ascii_art.py
@@ -72,5 +72,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4.3.0
         with:
           commit_message: 'Add generated ASCII Art'
-          file_pattern: 'arts/*.txt'
+          file_pattern: 'arts/*.md'
           branch: 'main'
