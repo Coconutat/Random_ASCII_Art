@@ -50,8 +50,11 @@ jobs:
               image = image.convert("L")
               ascii_chars = "@%#*+=-:. "
               pixels = np.array(image)
-              ascii_image = "".join([ascii_chars[pixel // 32] for pixel in pixels.flatten()])
-              return "\\n".join([ascii_image[i:i + 100] for i in range(0, len(ascii_image), 100)])
+
+              ascii_image = ""
+              for row in pixels:
+                  ascii_image += "".join([ascii_chars[pixel // 32] for pixel in row]) + "\n\n"  # 添加行间距
+              return ascii_image
 
           api_key = "${{ secrets.PEXELS_API_KEY }}"
           image_url = fetch_random_image(api_key)
@@ -68,7 +71,6 @@ jobs:
       - name: Commit ASCII Art to repository
         uses: stefanzweifel/git-auto-commit-action@v4.3.0
         with:
-            commit_message: 'Add generated ASCII Art'
-            file_pattern: 'arts/*.txt'
-            branch: 'main'
-  
+          commit_message: 'Add generated ASCII Art'
+          file_pattern: 'arts/*.txt'
+          branch: 'main'
