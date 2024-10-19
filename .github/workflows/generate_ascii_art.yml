@@ -71,4 +71,4 @@ jobs:
           author_email: 'actions@github.com'
           message: 'Add generated ASCII Art'
           add: 'arts/*.txt'
-          token: ${{ secrets.GH_TOKEN }}
+          github_token: ${{ secrets.GH_TOKEN }}
