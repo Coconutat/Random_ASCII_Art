@@ -1,0 +1,73 @@
+name: Generate ASCII Art
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'  # 每4小时运行一次
+  workflow_dispatch:
+
+jobs:
+  generate_art:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create arts directory
+        run: mkdir -p arts
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: |
+          pip install requests Pillow numpy
+
+      - name: Generate ASCII Art
+        run: |
+          echo 'import requests
+          from PIL import Image
+          import numpy as np
+          import io
+          import random
+          from datetime import datetime
+
+          def fetch_random_image(api_key):
+              response = requests.get(f"https://api.pexels.com/v1/search?query=nature&per_page=15", 
+                                      headers={"Authorization": api_key})
+              data = response.json()
+              image_url = random.choice(data["photos"])["src"]["original"]
+              return image_url
+
+          def image_to_ascii(image_url):
+              response = requests.get(image_url)
+              image = Image.open(io.BytesIO(response.content))
+              image = image.resize((100, 50))
+              image = image.convert("L")
+              ascii_chars = "@%#*+=-:. "
+              pixels = np.array(image)
+              ascii_image = "".join([ascii_chars[pixel // 32] for pixel in pixels.flatten()])
+              return "\\n".join([ascii_image[i:i + 100] for i in range(0, len(ascii_image), 100)])
+
+          api_key = "${{ secrets.PEXELS_API_KEY }}"
+          image_url = fetch_random_image(api_key)
+          ascii_art = image_to_ascii(image_url)
+
+          # 使用当前时间戳命名文件
+          now = datetime.now()
+          filename = f"arts/{now.strftime('%Y%m%d_%H%M%S')}.txt"
+          
+          with open(filename, "w") as f:
+              f.write(ascii_art)' > generate_ascii_art.py
+
+          python generate_ascii_art.py
+
+      - name: Commit ASCII Art to repository
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: 'GitHub Actions'
+          author_email: 'actions@github.com'
+          message: 'Add generated ASCII Art'
+          add: 'arts/*.txt'
