@@ -65,10 +65,10 @@ jobs:
           python generate_ascii_art.py
 
       - name: Commit ASCII Art to repository
-        uses: EndBug/add-and-commit@v9
+        uses: stefanzweifel/git-auto-commit-action@v4.3.0
         with:
-          author_name: 'GitHub Actions'
-          author_email: 'actions@github.com'
-          message: 'Add generated ASCII Art'
-          add: 'arts/*.txt'
-          github_token: ${{ secrets.GH_TOKEN }}
+            commit_message: 'Add generated ASCII Art'
+            file_pattern: 'arts/*.txt'
+            branch: 'main'
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+  
