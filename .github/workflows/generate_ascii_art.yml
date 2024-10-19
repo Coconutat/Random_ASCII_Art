@@ -70,5 +70,5 @@ jobs:
             commit_message: 'Add generated ASCII Art'
             file_pattern: 'arts/*.txt'
             branch: 'main'
-            github_token: ${{ secrets.GITHUB_TOKEN }}
+            github_token: ${{ secrets.USER_TOKEN }}
   
