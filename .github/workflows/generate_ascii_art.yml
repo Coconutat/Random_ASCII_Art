@@ -57,7 +57,7 @@ jobs:
 
           # 使用当前时间戳命名文件
           now = datetime.now()
-          filename = f"arts/{now.strftime('%Y%m%d_%H%M%S_%f')}.txt"
+          filename = f"arts/{uuid.uuid4()}.txt"
           
           with open(filename, "w") as f:
               f.write(ascii_art)' > generate_ascii_art.py
