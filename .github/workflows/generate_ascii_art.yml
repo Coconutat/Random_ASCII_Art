@@ -49,7 +49,14 @@ jobs:
           def image_to_ascii(image_url):
               response = requests.get(image_url)
               image = Image.open(io.BytesIO(response.content))
-              image = image.resize((200, 100))  # 调整图像大小
+              original_width, original_height = image.size
+              
+              # 计算新的尺寸，保持宽高比
+              aspect_ratio = original_width / original_height
+              new_width = 100  # 设定新的宽度
+              new_height = int(new_width / aspect_ratio)  # 根据比例计算高度
+
+              image = image.resize((new_width, new_height))
               image = image.convert("L")
               ascii_chars = '@%#*+=-:. '  # 使用更多的字符
               pixels = np.array(image)
