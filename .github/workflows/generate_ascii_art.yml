@@ -58,7 +58,7 @@ jobs:
 
               image = image.resize((new_width, new_height))
               image = image.convert("L")
-              ascii_chars = '@%#*+=-:. '  # 使用更多的字符
+              ascii_chars = "'@%#*+=-:. '"  # 使用更多的字符
               pixels = np.array(image)
 
               ascii_image = ""
