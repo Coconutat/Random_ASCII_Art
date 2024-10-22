@@ -36,8 +36,11 @@ jobs:
           import uuid
           from datetime import datetime
 
+          keywords = ["nature", "abstract", "city", "animals", "landscape", "people", "space"]
+
           def fetch_random_image(api_key):
-              response = requests.get(f"https://api.pexels.com/v1/search?query=nature&per_page=15", 
+              keyword = random.choice(keywords)  # 随机选择一个关键词
+              response = requests.get(f"https://api.pexels.com/v1/search?query={keyword}&per_page=30", 
                                       headers={"Authorization": api_key})
               data = response.json()
               image_url = random.choice(data["photos"])["src"]["original"]
