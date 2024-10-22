@@ -49,14 +49,14 @@ jobs:
           def image_to_ascii(image_url):
               response = requests.get(image_url)
               image = Image.open(io.BytesIO(response.content))
-              image = image.resize((100, 50))
+              image = image.resize((200, 100))  # 调整图像大小
               image = image.convert("L")
-              ascii_chars = "@%#*+=-:. "
+              ascii_chars = '@%#*+=-:. '  # 使用更多的字符
               pixels = np.array(image)
 
               ascii_image = ""
               for row in pixels:
-                  ascii_image += "".join([ascii_chars[pixel // 32] for pixel in row]) + "\n"  # 保留换行
+                  ascii_image += "".join([ascii_chars[pixel // 25] for pixel in row]) + "\n"  # 细分字符范围
               return ascii_image
 
           api_key = "${{ secrets.PEXELS_API_KEY }}"
