@@ -92,8 +92,11 @@ jobs:
           python generate_ascii_art.py
 
       - name: Commit ASCII Art to repository
-        uses: stefanzweifel/git-auto-commit-action@v4.3.0
-        with:
-          commit_message: 'Add generated ASCII Art'
-          file_pattern: 'arts/*.md'
-          branch: 'main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add arts/*.md
+          git commit -m "Add generated ASCII Art" || echo "No changes to commit"
+          git push
