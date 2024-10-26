@@ -39,12 +39,24 @@ jobs:
           keywords = ["nature", "abstract", "city", "animals", "landscape", "people", "space"]
 
           def fetch_random_image(api_key):
-              keyword = random.choice(keywords)  # 随机选择一个关键词
+              keyword = random.choice(keywords)
               response = requests.get(f"https://api.pexels.com/v1/search?query={keyword}&per_page=30", 
                                       headers={"Authorization": api_key})
-              data = response.json()
-              image_url = random.choice(data["photos"])["src"]["original"]
-              return image_url
+              if response.status_code == 200:
+                  try:
+                      data = response.json()
+                      if "photos" in data and data["photos"]:
+                          image_url = random.choice(data["photos"])["src"]["original"]
+                          return image_url
+                      else:
+                          print("未找到照片数据，返回空列表。")
+                          return None
+                  except requests.exceptions.JSONDecodeError:
+                      print("解析 JSON 失败")
+                      return None
+              else:
+                  print(f"请求失败，状态码：{response.status_code}")
+                  return None
 
           def image_to_ascii(image_url):
               response = requests.get(image_url)
@@ -54,27 +66,28 @@ jobs:
               # 计算新的尺寸，保持宽高比
               aspect_ratio = original_width / original_height
               new_width = 100  # 设定新的宽度
-              new_height = int(new_width / aspect_ratio)  # 根据比例计算高度
+              new_height = int(new_width / aspect_ratio)
 
               image = image.resize((new_width, new_height))
               image = image.convert("L")
-              ascii_chars = "'@%#*+=-:. '"  # 使用更多的字符
+              ascii_chars = "@%#*+=-:. "  # 使用更多的字符
               pixels = np.array(image)
 
               ascii_image = ""
               for row in pixels:
-                  ascii_image += "".join([ascii_chars[pixel // 25] for pixel in row]) + "\n"  # 细分字符范围
+                  ascii_image += "".join([ascii_chars[pixel // 25] for pixel in row]) + "\n"
               return ascii_image
 
           api_key = "${{ secrets.PEXELS_API_KEY }}"
           image_url = fetch_random_image(api_key)
-          ascii_art = image_to_ascii(image_url)
-
-          # 使用 UUID 命名文件并保存为 .md 文件
-          filename = f"arts/{uuid.uuid4()}.md"
           
-          with open(filename, "w") as f:
-              f.write(ascii_art)' > generate_ascii_art.py
+          if image_url:
+              ascii_art = image_to_ascii(image_url)
+              filename = f"arts/{uuid.uuid4()}.md"
+              with open(filename, "w") as f:
+                  f.write(ascii_art)
+          else:
+              print("获取图像 URL 失败，跳过 ASCII Art 生成。")' > generate_ascii_art.py
 
           python generate_ascii_art.py
 
