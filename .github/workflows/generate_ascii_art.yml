@@ -34,14 +34,18 @@ jobs:
           import io
           import random
           import uuid
-          from datetime import datetime
+
+          api_key = "${{ secrets.PEXELS_API_KEY }}"
+          image_url = fetch_random_image(api_key)
 
           keywords = ["nature", "abstract", "city", "animals", "landscape", "people", "space"]
 
           def fetch_random_image(api_key):
               keyword = random.choice(keywords)
-              response = requests.get(f"https://api.pexels.com/v1/search?query={keyword}&per_page=30", 
-                                      headers={"Authorization": api_key})
+              response = requests.get(
+                  f"https://api.pexels.com/v1/search?query={keyword}&per_page=30",
+                  headers={"Authorization": f"Bearer {api_key}"}
+              )
               if response.status_code == 200:
                   try:
                       data = response.json()
@@ -49,37 +53,35 @@ jobs:
                           image_url = random.choice(data["photos"])["src"]["original"]
                           return image_url
                       else:
-                          print("未找到照片数据，返回空列表。")
+                          print("No photo data found, returning empty list.")
                           return None
                   except requests.exceptions.JSONDecodeError:
-                      print("解析 JSON 失败")
+                      print("JSON decoding failed.")
                       return None
               else:
-                  print(f"请求失败，状态码：{response.status_code}")
+                  print(f"Request failed with status code: {response.status_code}")
                   return None
 
           def image_to_ascii(image_url):
               response = requests.get(image_url)
+              response.raise_for_status()
               image = Image.open(io.BytesIO(response.content))
               original_width, original_height = image.size
               
-              # 计算新的尺寸，保持宽高比
+              # Maintain aspect ratio
               aspect_ratio = original_width / original_height
-              new_width = 100  # 设定新的宽度
+              new_width = 100
               new_height = int(new_width / aspect_ratio)
 
               image = image.resize((new_width, new_height))
               image = image.convert("L")
-              ascii_chars = "@%#*+=-:. "  # 使用更多的字符
+              ascii_chars = "@%#*+=-:. "
               pixels = np.array(image)
 
               ascii_image = ""
               for row in pixels:
                   ascii_image += "".join([ascii_chars[pixel // 25] for pixel in row]) + "\n"
               return ascii_image
-
-          api_key = "${{ secrets.PEXELS_API_KEY }}"
-          image_url = fetch_random_image(api_key)
           
           if image_url:
               ascii_art = image_to_ascii(image_url)
@@ -87,7 +89,7 @@ jobs:
               with open(filename, "w") as f:
                   f.write(ascii_art)
           else:
-              print("获取图像 URL 失败，跳过 ASCII Art 生成。")' > generate_ascii_art.py
+              print("Failed to retrieve image URL, skipping ASCII Art generation.")' > generate_ascii_art.py
 
           python generate_ascii_art.py
 
