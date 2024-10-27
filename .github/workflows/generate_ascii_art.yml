@@ -35,9 +35,6 @@ jobs:
           import random
           import uuid
 
-          api_key = "${{ secrets.PEXELS_API_KEY }}"
-          image_url = fetch_random_image(api_key)
-
           keywords = ["nature", "abstract", "city", "animals", "landscape", "people", "space"]
 
           def fetch_random_image(api_key):
@@ -82,6 +79,9 @@ jobs:
               for row in pixels:
                   ascii_image += "".join([ascii_chars[pixel // 25] for pixel in row]) + "\n"
               return ascii_image
+
+              api_key = "${{ secrets.PEXELS_API_KEY }}"
+              image_url = fetch_random_image(api_key)
           
           if image_url:
               ascii_art = image_to_ascii(image_url)
