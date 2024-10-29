@@ -37,6 +37,7 @@ jobs:
           import io
           import random
           import uuid
+          import time
           from datetime import datetime
 
           BASE_URL = "https://wallhaven.cc/random/"
@@ -78,11 +79,14 @@ jobs:
               for row in pixels:
                   ascii_image += "".join([ascii_chars[min(pixel // 25, len(ascii_chars) - 1)] for pixel in row]) + "\\n"
               return ascii_image
+          
+              # 获取当前的 Unix 时间戳
+              timestamp = int(time.time())
 
           def save_ascii_art(ascii_art):
               if not os.path.exists("arts"):
                   os.makedirs("arts")
-              filename = f"arts/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{uuid.uuid4()}.md"
+              filename = f"arts/{timestamp}_{uuid.uuid4()}.md"
               with open(filename, "w") as f:
                   f.write(ascii_art)
               print(f"ASCII Art 已保存到 {filename}")
