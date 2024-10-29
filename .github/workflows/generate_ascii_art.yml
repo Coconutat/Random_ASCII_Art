@@ -82,7 +82,7 @@ jobs:
           def save_ascii_art(ascii_art):
               if not os.path.exists("arts"):
                   os.makedirs("arts")
-              filename = f"arts/{datetime.now().strftime("'%Y%m%d'")}_{uuid.uuid4()}.md"
+              filename = f"arts/{datetime.now().strftime(\"%Y%m%d\")}_{uuid.uuid4()}.md"
               with open(filename, "w") as f:
                   f.write(ascii_art)
               print(f"ASCII Art 已保存到 {filename}")
