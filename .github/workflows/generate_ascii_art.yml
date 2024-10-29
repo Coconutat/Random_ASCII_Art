@@ -38,7 +38,6 @@ jobs:
           import random
           import uuid
           import time
-          from datetime import datetime
 
           BASE_URL = "https://wallhaven.cc/random/"
           HEADERS = {
@@ -46,6 +45,7 @@ jobs:
           }
           COMMON_EXTENSIONS = ["jpg", "png", "webp"]
 
+          # 获取随机图片的 URL
           def get_random_image_urls():
               response = requests.get(BASE_URL, headers=HEADERS)
               response.raise_for_status()
@@ -59,6 +59,7 @@ jobs:
                   image_urls.append(base_image_url)
               return image_urls
 
+          # 获取实际图片
           def fetch_image(image_base_url):
               for ext in COMMON_EXTENSIONS:
                   image_url = f"{image_base_url}.{ext}"
@@ -71,6 +72,7 @@ jobs:
               print("所有后缀均尝试失败，跳过该图片。")
               return None
 
+          # 将图片转换为 ASCII 艺术
           def image_to_ascii(image_data):
               image = Image.open(io.BytesIO(image_data)).convert("L")
               ascii_chars = "@%#*+=-:. "
@@ -79,18 +81,19 @@ jobs:
               for row in pixels:
                   ascii_image += "".join([ascii_chars[min(pixel // 25, len(ascii_chars) - 1)] for pixel in row]) + "\\n"
               return ascii_image
-          
-              # 获取当前的 Unix 时间戳
-              timestamp = int(time.time())
 
+          # 保存 ASCII 艺术
           def save_ascii_art(ascii_art):
               if not os.path.exists("arts"):
                   os.makedirs("arts")
+              # 使用 Unix 时间戳和 UUID 生成文件名
+              timestamp = int(time.time())
               filename = f"arts/{timestamp}_{uuid.uuid4()}.md"
               with open(filename, "w") as f:
                   f.write(ascii_art)
               print(f"ASCII Art 已保存到 {filename}")
 
+          # 主函数
           def main():
               image_urls = get_random_image_urls()
               if image_urls:
