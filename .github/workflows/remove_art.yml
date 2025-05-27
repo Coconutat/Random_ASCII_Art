@@ -1,0 +1,27 @@
+name: Cleanup ASCII Art
+
+on:
+  schedule:
+    - cron: '0 0 */7 * *'  # 每7天运行一次
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
+
+      - name: Remove all files in arts directory
+        run: rm -rf arts/*
+
+      - name: Commit cleanup changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'Cleanup: Removed all ASCII art files'
+          file_pattern: 'arts/*'
+          branch: 'main'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
