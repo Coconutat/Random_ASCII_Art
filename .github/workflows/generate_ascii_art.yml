@@ -1,8 +1,8 @@
-name: Generate ASCII Art
+name: Generate ASCII Art (Randomized)
 
 on:
   schedule:
-    - cron: '0 */4 * * *'  # 每4小时运行一次
+    - cron: '0 * * * *'  # 每小时触发一次（注意：GitHub Actions 中 cron 使用 UTC 时间）
   workflow_dispatch:
 
 jobs:
@@ -10,23 +10,54 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: 检查是否执行（随机决策）
+        id: random_decision
+        run: |
+          # 随机延时 0 到 1800 秒（最多延时 30 分钟），使触发时间乱序
+          sleep_time=$(( RANDOM % 1800 ))
+          echo "随机延时 ${sleep_time} 秒……"
+          sleep ${sleep_time}
+
+          # 获取当前 UTC 小时（GitHub runner 的定时为 UTC）
+          current_hour=$(date -u +'%H')
+          echo "当前 UTC 小时为: ${current_hour}"
+
+          # 强制在 UTC 00:00 和 UTC 12:00 运行（对应香港时间08:00和20:00）
+          if [ "$current_hour" -eq "00" ] || [ "$current_hour" -eq "12" ]; then
+            echo "处于强制执行时段，任务必定执行。"
+            echo "proceed=true" >> $GITHUB_OUTPUT
+          else
+            # 其他时段随机决策，50% 几率执行
+            random_val=$(( RANDOM % 2 ))
+            if [ $random_val -eq 0 ]; then
+              echo "随机决策：此次跳过任务执行。"
+              echo "proceed=false" >> $GITHUB_OUTPUT
+              # 退出后续步骤（注意：exit 0 意味着工作成功退出，不报错）
+              exit 0
+            else
+              echo "随机决策：此次执行任务。"
+              echo "proceed=true" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: 检出代码仓库
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT }}
 
-      - name: Create arts directory
+      - name: 创建 arts 目录
         run: mkdir -p arts
 
-      - name: Set up Python
+      - name: 设置 Python 环境
         uses: actions/setup-python@v2
         with:
           python-version: '3.8'
 
-      - name: Install dependencies
+      - name: 安装依赖包
         run: |
           pip install requests Pillow numpy beautifulsoup4
 
-      - name: Copy Wallhaven ASCII Art script
+      - name: 复制 Wallhaven ASCII Art 脚本
         run: |
           echo '
           import os
@@ -45,7 +76,7 @@ jobs:
           }
           COMMON_EXTENSIONS = ["jpg", "png", "webp"]
 
-          # 获取随机图片的 URL
+          # 获取随机图片 URL
           def get_random_image_urls():
               response = requests.get(BASE_URL, headers=HEADERS)
               response.raise_for_status()
@@ -79,14 +110,13 @@ jobs:
               pixels = np.array(image)
               ascii_image = ""
               for row in pixels:
-                  ascii_image += "".join([ascii_chars[min(pixel // 25, len(ascii_chars) - 1)] for pixel in row]) + "\\n"
+                  ascii_image += "".join([ascii_chars[min(pixel // 25, len(ascii_chars) - 1)] for pixel in row]) + "\n"
               return ascii_image
 
           # 保存 ASCII 艺术
           def save_ascii_art(ascii_art):
               if not os.path.exists("arts"):
                   os.makedirs("arts")
-              # 使用 Unix 时间戳和 UUID 生成文件名
               timestamp = int(time.time())
               filename = f"arts/{timestamp}_{uuid.uuid4()}.md"
               with open(filename, "w") as f:
@@ -114,10 +144,12 @@ jobs:
               main()
           ' > wallhaven_ascii_arts_random_noapi.py
 
-      - name: Run Wallhaven ASCII Art script
+      - name: 运行 Wallhaven ASCII Art 脚本
+        if: steps.random_decision.outputs.proceed == 'true'
         run: python wallhaven_ascii_arts_random_noapi.py
 
-      - name: Commit ASCII Art to repository
+      - name: 提交生成的 ASCII Art 到仓库
+        if: steps.random_decision.outputs.proceed == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'Add generated ASCII Art'
